@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://roccosroofing.com/sitemap.xml
+Sitemap: https://rocco-bianculli.github.io/Roccos-Roofing/sitemap.xml

@@ -14,26 +14,60 @@ deliberate: you should be able to maintain your own site.
 
 Nothing else on this list matters until these are done.
 
-### a) Claim `roccosroofing.com` — the site has no working address
+### a) Point `roccosroofing.com` somewhere that answers — the site has no working address
 
-Right now the domain resolves to Vercel (`216.198.79.1`) but **no project owns
-it**, so no HTTPS certificate was ever issued and `https://roccosroofing.com`
-fails to load entirely. The only working copy of the site is at
-`rocco-bianculli.github.io/Roccos-Roofing`.
+**Status as of 2026-08-24: still broken, and it has been broken since roughly
+July 27.** `https://roccosroofing.com` fails with `ERR_SSL_PROTOCOL_ERROR`. The
+DNS points at Vercel (`216.198.79.1`, and `www` at `vercel-dns-017`), but no
+Vercel project claims the domain, so a certificate was never issued and there is
+nothing listening. `roccos-roofing.com` — the hyphenated domain in Joe's email
+address — is a GoDaddy forward that redirects straight into the broken one, so
+it is dead too.
 
-Meanwhile every page in this repo tells Google the *real* address is
-`roccosroofing.com` (that's what a `<link rel="canonical">` does). So Google is
-being pointed at a URL that doesn't answer. Until this is fixed the site cannot
-rank for anything.
+Google still lists `roccosroofing.com` with the correct title and description,
+because it was crawled before the DNS change. The search result looks perfectly
+healthy and then dies the moment anyone clicks it. That is the whole problem.
 
-Fix: import this repo into Vercel under **Rocco's own account**, then add
-`roccosroofing.com` and `www.roccosroofing.com` as domains on that project. The
-DNS already points there, so the certificate should issue within minutes. No
-build settings to change — Vercel serves the HTML as-is and picks up `/api`
-automatically.
+The only working copy of the site is `rocco-bianculli.github.io/Roccos-Roofing`.
 
-Deploying to Vercel is also what makes the contact form work (see below).
-GitHub Pages cannot run server code, so the form can never send email there.
+**Temporary change made 2026-08-24:** every `<link rel="canonical">`, `og:url`,
+`sitemap.xml` entry and the `Sitemap:` line in `robots.txt` now points at the
+GitHub Pages URL instead of the dead domain. Before this, the working copy was
+telling Google "the real version of me lives at that broken address", which kept
+*both* URLs out of search. This is a stopgap so the site is reachable from
+Google again — not the real fix.
+
+**Two ways to actually fix it. Pick one.**
+
+*Option 1 — back to GitHub Pages (free, fastest, no new accounts).* In GoDaddy →
+DNS, delete the current records for `@` and `www` and set:
+
+    A      @      185.199.108.153
+    A      @      185.199.109.153
+    A      @      185.199.110.153
+    A      @      185.199.111.153
+    CNAME  www    rocco-bianculli.github.io
+
+Then — and only *after* DNS has moved — a file named `CNAME` containing
+`roccosroofing.com` goes back in this repo, and GitHub issues the certificate
+automatically. Doing it in the other order takes the last working URL offline,
+because Pages would start redirecting `github.io` to the dead domain.
+
+*Option 2 — Vercel (does more, needs an account).* Import this repo into Vercel
+under **Rocco's own account**, then add `roccosroofing.com` and
+`www.roccosroofing.com` as domains on that project. The DNS already points
+there, so the certificate issues within minutes. No build settings to change —
+Vercel serves the HTML as-is and picks up `/api` automatically. This is the only
+option that makes the contact form actually send email (see below); GitHub Pages
+cannot run server code.
+
+**Whichever option you pick, flip the canonicals back afterwards.** From the
+repo root:
+
+    sed -i '' 's#https://rocco-bianculli.github.io/Roccos-Roofing/#https://roccosroofing.com/#g' *.html sitemap.xml robots.txt
+
+Also worth doing once the domain is live: point `roccos-roofing.com` at the same
+place rather than forwarding, so that domain stops being a dead end too.
 
 ### b) Set the three environment variables so the form sends
 
