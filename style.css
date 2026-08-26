@@ -88,6 +88,8 @@ section.pad{padding:74px 0}
 .area .towns li{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#e3eaf7}
 .town-head{font-size:22px;color:var(--blue-darker);margin:38px 0 0;letter-spacing:.4px}
 .town-head:first-of-type{margin-top:8px}
+.town-note{margin:6px 0 0;font-size:15px;color:var(--muted)}
+.town-note + .towns{margin-top:14px}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
 .split .imgcard{background:linear-gradient(150deg,var(--blue-deep),var(--blue));border-radius:var(--radius);min-height:320px;display:grid;place-items:center;position:relative;overflow:hidden;padding:30px}
 .split .imgcard img{max-width:70%;filter:drop-shadow(0 8px 20px rgba(0,0,0,.25));background:#fff;border-radius:50%;padding:14px}
