@@ -160,4 +160,100 @@
         });
     });
   }
+
+  /* ------------------------------------------------------------ sliders
+     On phones the card grids scroll sideways instead of stacking (see the
+     mobile card slider block in style.css). Two additions here: dots, so
+     there is a visible cue that more cards exist, and a slow auto-advance so
+     the extra cards get noticed at all. The advance stops permanently the
+     first time someone swipes or taps a dot — a carousel that keeps yanking
+     itself out from under the reader is worse than no carousel. It never
+     starts for visitors who ask for reduced motion, and it pauses whenever
+     the tab is in the background. */
+  var mobile = window.matchMedia('(max-width:620px)');
+  var still = window.matchMedia('(prefers-reduced-motion:reduce)');
+
+  var buildSlider = function (track) {
+    var cards = Array.prototype.slice.call(track.children);
+    if (cards.length < 2) return;
+
+    var dots = document.createElement('div');
+    dots.className = 'cdots';
+    dots.setAttribute('role', 'tablist');
+    dots.setAttribute('aria-label', 'Choose a card');
+
+    var buttons = cards.map(function (card, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-label', 'Card ' + (i + 1) + ' of ' + cards.length);
+      b.addEventListener('click', function () {
+        stop();
+        goTo(i);
+      });
+      dots.appendChild(b);
+      return b;
+    });
+    track.parentNode.insertBefore(dots, track.nextSibling);
+
+    var current = 0;
+    var timer = null;
+
+    var mark = function (i) {
+      current = i;
+      buttons.forEach(function (b, n) {
+        b.setAttribute('aria-current', String(n === i));
+      });
+    };
+
+    var goTo = function (i) {
+      // scrollIntoView would also scroll the page vertically; this only moves
+      // the track, which is what we want.
+      track.scrollTo({ left: cards[i].offsetLeft - track.offsetLeft, behavior: still.matches ? 'auto' : 'smooth' });
+      mark(i);
+    };
+
+    var stop = function () {
+      if (timer) { clearInterval(timer); timer = null; }
+    };
+
+    var start = function () {
+      if (timer || still.matches || !mobile.matches) return;
+      timer = setInterval(function () {
+        if (document.hidden) return;
+        goTo((current + 1) % cards.length);
+      }, 5000);
+    };
+
+    // Keep the dots honest when the visitor swipes by hand.
+    var settle;
+    track.addEventListener('scroll', function () {
+      clearTimeout(settle);
+      settle = setTimeout(function () {
+        var mid = track.scrollLeft + track.clientWidth / 2;
+        var best = 0, dist = Infinity;
+        cards.forEach(function (c, i) {
+          var d = Math.abs((c.offsetLeft - track.offsetLeft) + c.offsetWidth / 2 - mid);
+          if (d < dist) { dist = d; best = i; }
+        });
+        mark(best);
+      }, 90);
+    }, { passive: true });
+
+    ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(function (evt) {
+      track.addEventListener(evt, stop, { passive: true });
+    });
+
+    mark(0);
+    start();
+    mobile.addEventListener('change', function () {
+      stop();
+      if (mobile.matches) { track.scrollTo({ left: 0 }); mark(0); start(); }
+    });
+  };
+
+  ['.features', '.svc-grid', '.certs'].forEach(function (sel) {
+    Array.prototype.forEach.call(document.querySelectorAll(sel), buildSlider);
+  });
+
 })();

@@ -234,3 +234,36 @@ body.lb-locked{overflow:hidden}
   .feature:hover,.svc:hover{transform:none}
   .gallery a:hover img{transform:none}
 }
+
+/* ------------------------------------------------- mobile card slider
+   Four cards in a single column is a lot of thumb-scrolling on a phone, and
+   the section stops fitting on one screen. Below 620px the card grids become
+   a horizontal snap-scroller instead, so the cards slide across rather than
+   stack. This is CSS-only — with JavaScript off it is still a swipeable row;
+   the dots and the slow auto-advance in site.js are the enhancement. */
+.cdots{display:none}
+@media(max-width:620px){
+  .features,.svc-grid,.certs{
+    grid-template-columns:none;
+    grid-auto-flow:column;
+    grid-auto-columns:85%;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:2px}
+  .features::-webkit-scrollbar,
+  .svc-grid::-webkit-scrollbar,
+  .certs::-webkit-scrollbar{display:none}
+  .features>*,.svc-grid>*,.certs>*{scroll-snap-align:center}
+  .cdots{display:flex;justify-content:center;gap:8px;margin:18px 0 0;padding:0}
+  .cdots button{
+    width:8px;height:8px;padding:0;border:0;border-radius:50%;
+    background:var(--line);cursor:pointer;
+    transition:width .18s ease,background .18s ease}
+  .cdots button[aria-current="true"]{width:22px;border-radius:4px;background:var(--gold)}
+}
+@media(prefers-reduced-motion:reduce){
+  .features,.svc-grid,.certs{scroll-behavior:auto}
+}
